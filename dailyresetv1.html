@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Reset — Morning Protocol</title>
+<style>
+  @font-face {
+    font-family: 'Stencil';
+    src: local('Arial Narrow Bold');
+  }
+
+  :root {
+    --ink: #1A1D1B;
+    --ink-soft: #2B2F2C;
+    --bone: #E8E2D4;
+    --bone-dim: #C9C2AE;
+    --brass: #8C7A4E;
+    --brass-bright: #B59B5F;
+    --signal: #5C7A5C;
+    --rust: #A35238;
+    --hairline: rgba(232,226,212,0.14);
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--ink);
+    color: var(--bone);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .display {
+    font-family: 'Arial Narrow', 'Oswald', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  ::selection { background: var(--brass); color: var(--ink); }
+
+  /* ---------- TOP MASTHEAD ---------- */
+  .masthead {
+    border-bottom: 1px solid var(--hairline);
+    padding: 28px 20px 22px;
+    position: sticky;
+    top: 0;
+    background: var(--ink);
+    z-index: 50;
+  }
+  .masthead-inner {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+  .masthead-title {
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--bone);
+  }
+  .masthead-sub {
+    font-size: 0.68rem;
+    letter-spacing: 0.18em;
+    color: var(--brass-bright);
+    text-transform: uppercase;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+  .date-stamp {
+    font-size: 0.7rem;
+    color: var(--bone-dim);
+    text-align: right;
+    letter-spacing: 0.05em;
+  }
+
+  /* ---------- ORDERS BLOCK (intro) ---------- */
+  .orders {
+    max-width: 720px;
+    margin: 28px auto 0;
+    padding: 0 20px;
+  }
+  .orders-box {
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--brass);
+    padding: 16px 18px;
+    font-size: 0.88rem;
+    line-height: 1.6;
+    color: var(--bone-dim);
+  }
+  .orders-box strong { color: var(--bone); }
+
+  /* ---------- MODE TOGGLE ---------- */
+  .mode-row {
+    max-width: 720px;
+    margin: 22px auto 0;
+    padding: 0 20px;
+    display: flex;
+    gap: 10px;
+  }
+  .mode-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--hairline);
+    color: var(--bone-dim);
+    padding: 12px 10px;
+    font-family: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .mode-btn.active {
+    background: var(--brass);
+    color: var(--ink);
+    border-color: var(--brass);
+  }
+  .mode-btn.flare.active {
+    background: var(--rust);
+    border-color: var(--rust);
+    color: var(--bone);
+  }
+
+  /* ---------- PROGRESS BAR ---------- */
+  .progress-wrap {
+    max-width: 720px;
+    margin: 18px auto 0;
+    padding: 0 20px;
+  }
+  .progress-track {
+    height: 3px;
+    background: var(--hairline);
+    width: 100%;
+    position: relative;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--signal);
+    width: 0%;
+    transition: width 0.3s ease;
+  }
+  .progress-label {
+    font-size: 0.66rem;
+    letter-spacing: 0.12em;
+    color: var(--bone-dim);
+    margin-top: 7px;
+    text-transform: uppercase;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* ---------- PHASE CARDS ---------- */
+  .phases {
+    max-width: 720px;
+    margin: 30px auto;
+    padding: 0 20px;
+  }
+  .phase-card {
+    border: 1px solid var(--hairline);
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    background: var(--ink-soft);
+  }
+  .phase-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .phase-num {
+    font-size: 0.7rem;
+    color: var(--brass-bright);
+    border: 1px solid var(--brass);
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+  }
+  .phase-titles { flex: 1; }
+  .phase-title {
+    font-size: 0.95rem;
+    color: var(--bone);
+    letter-spacing: 0.02em;
+  }
+  .phase-time {
+    font-size: 0.68rem;
+    color: var(--bone-dim);
+    letter-spacing: 0.08em;
+    margin-top: 2px;
+  }
+  .phase-check {
+    width: 22px;
+    height: 22px;
+    border: 1.5px solid var(--bone-dim);
+    flex-shrink: 0;
+    position: relative;
+    transition: all 0.15s ease;
+  }
+  .phase-check.done {
+    background: var(--signal);
+    border-color: var(--signal);
+  }
+  .phase-check.done::after {
+    content: '';
+    position: absolute;
+    left: 6px; top: 2px;
+    width: 6px; height: 11px;
+    border-right: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
+    transform: rotate(45deg);
+  }
+
+  .phase-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+  }
+  .phase-body.open { max-height: 900px; }
+  .phase-body-inner {
+    padding: 0 18px 18px 18px;
+    border-top: 1px solid var(--hairline);
+  }
+
+  .ex-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 11px 0;
+    border-bottom: 1px solid var(--hairline);
+    font-size: 0.84rem;
+  }
+  .ex-row:last-child { border-bottom: none; }
+  .ex-name { color: var(--bone); }
+  .ex-detail { color: var(--bone-dim); font-size: 0.74rem; }
+  .ex-reps {
+    color: var(--brass-bright);
+    font-size: 0.78rem;
+    font-weight: 700;
+    white-space: nowrap;
+    margin-left: 14px;
+    letter-spacing: 0.03em;
+  }
+  .ex-cue {
+    font-size: 0.74rem;
+    color: var(--bone-dim);
+    font-style: italic;
+    margin-top: 2px;
+  }
+
+  /* stamp */
+  .stamp {
+    position: absolute;
+    top: 14px;
+    right: 18px;
+    border: 2px solid var(--signal);
+    color: var(--signal);
+    font-size: 0.62rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    padding: 4px 9px;
+    transform: rotate(-8deg);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    text-transform: uppercase;
+  }
+  .stamp.show { opacity: 0.85; }
+
+  /* ---------- ALARM CHECK-IN ---------- */
+  .checkin-section {
+    max-width: 720px;
+    margin: 36px auto;
+    padding: 0 20px;
+  }
+  .section-eyebrow {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    color: var(--brass-bright);
+    text-transform: uppercase;
+    font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .checkin-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .checkin-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--hairline);
+    font-size: 0.82rem;
+    color: var(--bone-dim);
+    cursor: pointer;
+  }
+  .checkin-item .box {
+    width: 16px; height: 16px;
+    border: 1.5px solid var(--bone-dim);
+    flex-shrink: 0;
+  }
+  .checkin-item.on .box { background: var(--brass); border-color: var(--brass); }
+  .checkin-item.on { color: var(--bone); }
+
+  /* ---------- WEEKLY GRID ---------- */
+  .week-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    max-width: 720px;
+    margin: 0 auto 36px;
+    padding: 0 20px;
+  }
+  .day-cell {
+    border: 1px solid var(--hairline);
+    padding: 10px 4px;
+    text-align: center;
+  }
+  .day-name {
+    font-size: 0.6rem;
+    letter-spacing: 0.06em;
+    color: var(--brass-bright);
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+  .day-detail {
+    font-size: 0.6rem;
+    color: var(--bone-dim);
+    margin-top: 6px;
+    line-height: 1.4;
+  }
+
+  /* ---------- WALK BLOCK ---------- */
+  .walk-block {
+    max-width: 720px;
+    margin: 0 auto 36px;
+    padding: 0 20px;
+  }
+  .walk-card {
+    border: 1px solid var(--hairline);
+    border-left: 3px solid var(--signal);
+    padding: 16px 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .walk-card-title { font-size: 0.85rem; color: var(--bone); }
+  .walk-card-sub { font-size: 0.72rem; color: var(--bone-dim); margin-top: 4px; }
+  .walk-card-num { font-size: 1.6rem; color: var(--brass-bright); font-weight: 800; }
+
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    font-size: 0.68rem;
+    color: var(--bone-dim);
+    letter-spacing: 0.08em;
+    border-top: 1px solid var(--hairline);
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
+  }
+
+  @media (max-width: 480px) {
+    .masthead-title { font-size: 1.25rem; }
+    .day-detail { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-inner">
+    <div>
+      <div class="masthead-title display">Daily Reset</div>
+      <div class="masthead-sub">Nervous system first — every morning, 8 weeks, no exceptions</div>
+    </div>
+    <div class="date-stamp" id="dateStamp"></div>
+  </div>
+</div>
+
+<div class="orders">
+  <div class="orders-box">
+    <strong>The standard isn't optimization. It's consistency.</strong> Six years of compensations don't unwind in a week. Every morning you're teaching your nervous system one message: <strong>you are safe, aligned, stable, and capable of movement.</strong> Missing a day is worse than doing the short version. Run this exactly as written for 8 straight weeks before changing anything.
+  </div>
+</div>
+
+<div class="mode-row">
+  <button class="mode-btn active" id="btnFull" onclick="setMode('full')">Full Routine — 23 min</button>
+  <button class="mode-btn flare" id="btnFlare" onclick="setMode('flare')">Flare Day — 10 min</button>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+  <div class="progress-label"><span id="progressText">0 of 0 phases complete</span><span id="resetLink" style="cursor:pointer; text-decoration:underline;" onclick="resetToday()">reset</span></div>
+</div>
+
+<div class="phases" id="phaseContainer"></div>
+
+<div class="checkin-section">
+  <div class="section-eyebrow">Daily Check-In — Set 4 Alarms</div>
+  <div class="checkin-grid" id="checkinGrid"></div>
+</div>
+
+<div class="walk-block">
+  <div class="walk-card">
+    <div>
+      <div class="walk-card-title">Daily Walk</div>
+      <div class="walk-card-sub">Zone 2 — you should be able to talk. Walking, pool walking, or step machine.</div>
+    </div>
+    <div class="walk-card-num">20–30<span style="font-size:0.9rem;">min</span></div>
+  </div>
+</div>
+
+<div class="checkin-section" style="margin-top:0;">
+  <div class="section-eyebrow">Weekly Structure</div>
+  <div class="week-grid">
+    <div class="day-cell"><div class="day-name">Mon</div><div class="day-detail">Full routine + push/pull/light strength</div></div>
+    <div class="day-cell"><div class="day-name">Tue</div><div class="day-detail">Full routine + yoga / pool / sauna</div></div>
+    <div class="day-cell"><div class="day-name">Wed</div><div class="day-detail">Full routine + push/pull/light strength</div></div>
+    <div class="day-cell"><div class="day-name">Thu</div><div class="day-detail">Full routine + yoga / pool / sauna</div></div>
+    <div class="day-cell"><div class="day-name">Fri</div><div class="day-detail">Full routine + push/pull/light strength</div></div>
+    <div class="day-cell"><div class="day-name">Sat</div><div class="day-detail">Long walk + pool + gentle mobility only</div></div>
+    <div class="day-cell"><div class="day-name">Sun</div><div class="day-detail">10-min minimum + long stretch + plan week</div></div>
+  </div>
+</div>
+
+<footer>
+  Priorities, in order: airway &amp; sleep → daily consistency → glute/core/scapular strength → thoracic mobility → conditioning → everything else.
+</footer>
+
+<script>
+  const FULL_PHASES = [
+    {
+      title: "Nervous System Reset",
+      time: "3 min",
+      ex: [
+        { name: "90/90 Diaphragmatic Breathing", reps: "5 breaths", detail: "Lie back, feet on couch/chair. In through nose 4 sec, out slow 6–8 sec.", cue: "Relax jaw. Tongue lightly on roof of mouth. Let shoulders soften." }
+      ]
+    },
+    {
+      title: "Mobility",
+      time: "7 min",
+      ex: [
+        { name: "Cat-Camel", reps: "10 reps", detail: "Move slowly." },
+        { name: "Open Books", reps: "10 / side", detail: "Restore thoracic rotation." },
+        { name: "Thoracic Extension over Foam Roller", reps: "5 positions × 3", detail: "" },
+        { name: "Chin Tucks", reps: "10 reps", detail: "Hold 5 sec each." },
+        { name: "Levator Stretch", reps: "30 sec / side", detail: "" }
+      ]
+    },
+    {
+      title: "Stability — Core, Glutes, Scapula",
+      time: "10 min",
+      ex: [
+        { name: "Dead Bug", reps: "2 × 8 / side", detail: "Slow. Maintain breathing." },
+        { name: "Bird Dog", reps: "2 × 8 / side", detail: "Pelvis stays level." },
+        { name: "Glute Bridge", reps: "2 × 12", detail: "Pause 3 sec at top." },
+        { name: "Clamshell", reps: "2 × 15 / side", detail: "" },
+        { name: "Wall Slides", reps: "2 × 10", detail: "" },
+        { name: "Prone Y Raise", reps: "2 × 10", detail: "No weight initially." }
+      ]
+    },
+    {
+      title: "Balance / Proprioception",
+      time: "3 min",
+      ex: [
+        { name: "Single-Leg Stance", reps: "30 sec × 2, each leg", detail: "Progression: eyes closed." }
+      ]
+    }
+  ];
+
+  const FLARE_PHASES = [
+    {
+      title: "10-Minute Minimum",
+      time: "10 min",
+      ex: [
+        { name: "Breathing", reps: "2 min", detail: "90/90 diaphragmatic." },
+        { name: "Open Books", reps: "10 / side", detail: "" },
+        { name: "Chin Tucks", reps: "10 reps", detail: "" },
+        { name: "Glute Bridges", reps: "15 reps", detail: "" },
+        { name: "Bird Dogs", reps: "10 reps", detail: "" },
+        { name: "Wall Slides", reps: "10 reps", detail: "" },
+        { name: "Walk", reps: "10 min", detail: "" }
+      ]
+    }
+  ];
+
+  const CHECKIN_ITEMS = [
+    "Am I breathing through my nose?",
+    "Is my jaw relaxed?",
+    "Is my tongue on the roof of my mouth?",
+    "Am I sitting tall?",
+    "Are my shoulders relaxed?"
+  ];
+
+  let mode = 'full';
+  let state = { full: {}, flare: {}, checkin: {} };
+
+  function getPhases() { return mode === 'full' ? FULL_PHASES : FLARE_PHASES; }
+
+  function setMode(m) {
+    mode = m;
+    document.getElementById('btnFull').classList.toggle('active', m === 'full');
+    document.getElementById('btnFlare').classList.toggle('active', m === 'flare');
+    render();
+  }
+
+  function togglePhase(i) {
+    const key = i;
+    state[mode][key] = !state[mode][key];
+    render();
+  }
+
+  function toggleBody(i) {
+    const body = document.getElementById('body-' + i);
+    body.classList.toggle('open');
+  }
+
+  function toggleCheckin(i) {
+    state.checkin[i] = !state.checkin[i];
+    renderCheckin();
+  }
+
+  function resetToday() {
+    state[mode] = {};
+    render();
+  }
+
+  function render() {
+    const phases = getPhases();
+    const container = document.getElementById('phaseContainer');
+    container.innerHTML = '';
+    let doneCount = 0;
+
+    phases.forEach((phase, i) => {
+      const isDone = !!state[mode][i];
+      if (isDone) doneCount++;
+
+      const card = document.createElement('div');
+      card.className = 'phase-card';
+
+      const exRows = phase.ex.map(e => `
+        <div class="ex-row">
+          <div>
+            <div class="ex-name">${e.name}</div>
+            ${e.detail ? `<div class="ex-detail">${e.detail}</div>` : ''}
+            ${e.cue ? `<div class="ex-cue">${e.cue}</div>` : ''}
+          </div>
+          <div class="ex-reps">${e.reps}</div>
+        </div>
+      `).join('');
+
+      card.innerHTML = `
+        <div class="stamp ${isDone ? 'show' : ''}">Complete</div>
+        <div class="phase-head" onclick="toggleBody(${i})">
+          <div class="phase-num">${i + 1}</div>
+          <div class="phase-titles">
+            <div class="phase-title display" style="font-size:0.85rem;">${phase.title}</div>
+            <div class="phase-time">${phase.time}</div>
+          </div>
+          <div class="phase-check ${isDone ? 'done' : ''}" onclick="event.stopPropagation(); togglePhase(${i})"></div>
+        </div>
+        <div class="phase-body" id="body-${i}">
+          <div class="phase-body-inner">${exRows}</div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    document.getElementById('progressText').textContent = `${doneCount} of ${phases.length} phases complete`;
+    document.getElementById('progressFill').style.width = phases.length ? `${(doneCount / phases.length) * 100}%` : '0%';
+  }
+
+  function renderCheckin() {
+    const grid = document.getElementById('checkinGrid');
+    grid.innerHTML = CHECKIN_ITEMS.map((text, i) => `
+      <div class="checkin-item ${state.checkin[i] ? 'on' : ''}" onclick="toggleCheckin(${i})">
+        <div class="box"></div>
+        <div>${text}</div>
+      </div>
+    `).join('');
+  }
+
+  document.getElementById('dateStamp').textContent = new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+
+  render();
+  renderCheckin();
+</script>
+
+</body>
+</html>
